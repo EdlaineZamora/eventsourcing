@@ -13,7 +13,10 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.util.List;
 
+import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.toList;
 import static org.apache.logging.log4j.util.Strings.EMPTY;
 
 @Service
@@ -57,10 +60,26 @@ public class EventService {
     public OrderResponse createOrderFromEventStore(String orderId) {
         EventStream ordersEventStream = eventStore.getEventStream(AGGREGATION_NAME, orderId);
 
-        Event event = ordersEventStream.getEvents()
-                .findFirst()
-                .get();
+        List<OrderResponse> ordersResponse = ordersEventStream.getEvents()
+                .map(this::converterEventToOrderResponse)
+                .collect(toList());
 
+        return rebuildTheOrder(ordersResponse);
+    }
+
+    private OrderResponse rebuildTheOrder(List<OrderResponse> ordersResponse) {
+        OrderResponse orderResponse = ordersResponse.get(0);
+
+        ordersResponse.stream().forEach(order -> {
+            if (nonNull(order.offers)) {
+                orderResponse.offers = order.offers;
+            }
+        });
+
+        return orderResponse;
+    }
+
+    private OrderResponse converterEventToOrderResponse(Event event) {
         OrderResponse orderResponse = new OrderResponse();
 
         try {
