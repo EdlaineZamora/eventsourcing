@@ -6,10 +6,10 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @ComponentScan({"com.br.events.store.*"})
-public class HotelProviderApplication {
+public class HotelApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(HotelProviderApplication.class, args);
+        SpringApplication.run(HotelApplication.class, args);
     }
 
 }
